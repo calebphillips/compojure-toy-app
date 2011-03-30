@@ -1,4 +1,4 @@
-(ns hello-www.core
+(ns compojure-toy-app.core
     (:use compojure.core)
     (:use hiccup.core)
     (:use hiccup.page-helpers)
