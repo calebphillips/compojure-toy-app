@@ -14,7 +14,10 @@
       (add-records #{}
                    (struct cd "My Favorite Things" "John Coltrane")
                    (struct cd "I and Love and You" "The Avett Brothers")
-                   (struct cd "The Medicine" "John Mark McMillan")))
+                   (struct cd "The Medicine" "John Mark McMillan")
+                   (struct cd "Room for Squares", "John Mayer")))
+
+(def db (ref (init-db)))
 
 (defn cd-rows [db]
       (map (fn [{:keys [title artist]}] 
@@ -38,7 +41,7 @@
         [:table {:border 1}
                 [:tr
                   [:th "Title"] [:th "Artist"]]
-                (cd-rows (init-db))]
+                (cd-rows @db)]
         [:p [:a {:href "/cds/new"} "New CD"]]
         ))
 
@@ -53,7 +56,8 @@
                [:input {:type "submit" :value "add"}]]))
 
 (defn add-cd [cd]
-      (println "adding cd"))
+      (dosync (alter db conj cd))
+      (println (str "added cd " (:title cd))))
 
 (defroutes main-routes
              (GET "/cds" [] (home-page))
