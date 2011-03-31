@@ -8,15 +8,13 @@
               [compojure.handler :as handler]))
 
 
-(def db (ref (compojure-toy-app.data/init-db)))
-
-(defn cd-rows [db]
+(defn format-cds [db]
       (map (fn [{:keys [title artist]}] 
                [:tr 
                  [:td title]
                  [:td artist]]) db))
 
-(defn view-layout [& content]
+(defn view-shell [& content]
       (html
         (doctype :xhtml-strict)
         (xhtml-tag "en"
@@ -26,18 +24,18 @@
                      [:title "Play List"]]
                    [:body content])))
 
-(defn home-page []
-      (view-layout
+(defn cd-list-view []
+      (view-shell
         [:h1 "The Play List"]  
         [:table {:border 1}
                 [:tr
                   [:th "Title"] [:th "Artist"]]
-                (cd-rows @db)]
+                (format-cds (compojure-toy-app.data/select-all))]
         [:p [:a {:href "/cds/new"} "New CD"]]
         ))
 
 (defn new-cd-view []
-      (view-layout
+      (view-shell
         [:h1 "Add a New CD"]
         [:form {:method "post" :action "/cds"}
                [:input {:type "text" :name "title"}]
@@ -46,15 +44,12 @@
                [:br]
                [:input {:type "submit" :value "add"}]]))
 
-(defn add-cd [cd]
-      (dosync (alter db conj cd))
-      (println (str "added cd " (:title cd))))
 
 (defroutes main-routes
-             (GET "/cds" [] (home-page))
+             (GET "/cds" [] (cd-list-view))
              (GET "/cds/new" [] (new-cd-view))
              (POST "/cds" [title artist] 
-                   (add-cd (struct cd title artist))
+                   (compojure-toy-app.data/add-cd  (struct cd title artist))
                    (redirect "/cds"))
              (route/resources "/")
              (route/not-found "Page not found"))

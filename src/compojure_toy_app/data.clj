@@ -10,3 +10,10 @@
                    (struct cd "I and Love and You" "The Avett Brothers")
                    (struct cd "The Medicine" "John Mark McMillan")
                    (struct cd "Room for Squares", "John Mayer"))) 
+
+(def db (ref (init-db)))
+
+(defn select-all [] @db)
+
+(defn add-cd [cd]
+      (dosync (alter db conj cd)))
