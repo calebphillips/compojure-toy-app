@@ -3,16 +3,13 @@
     (:use hiccup.core)
     (:use hiccup.page-helpers)
     (:use ring.util.response)
-    (:use compojure-toy-app.data)
     (:require [compojure.route :as route]
-              [compojure.handler :as handler]))
+              [compojure.handler :as handler]
+              [compojure-toy-app.data :as data]))
 
 
-(defn format-cds [db]
-      (map (fn [{:keys [title artist]}] 
-               [:tr 
-                 [:td title]
-                 [:td artist]]) db))
+(defn format-cd [{:keys [title artist]}]
+            [:tr [:td title] [:td artist]])
 
 (defn view-shell [& content]
       (html
@@ -30,9 +27,8 @@
         [:table {:border 1}
                 [:tr
                   [:th "Title"] [:th "Artist"]]
-                (format-cds (compojure-toy-app.data/select-all))]
-        [:p [:a {:href "/cds/new"} "New CD"]]
-        ))
+                (map format-cd (data/select-all))]
+        [:p [:a {:href "/cds/new"} "New CD"]]))
 
 (defn new-cd-view []
       (view-shell
@@ -49,7 +45,7 @@
              (GET "/cds" [] (cd-list-view))
              (GET "/cds/new" [] (new-cd-view))
              (POST "/cds" [title artist] 
-                   (compojure-toy-app.data/add-cd  (struct cd title artist))
+                   (data/add-cd  (struct data/cd title artist))
                    (redirect "/cds"))
              (route/resources "/")
              (route/not-found "Page not found"))
