@@ -16,4 +16,5 @@
 (defn select-all [] @db)
 
 (defn add-cd [cd]
-      (dosync (alter db conj cd)))
+      (dosync (alter db conj cd))
+      (println @db))
