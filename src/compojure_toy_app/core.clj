@@ -30,27 +30,29 @@
                 (map format-cd (data/select-all))]
         [:p [:a {:href "/cds/new"} "New CD"]]))
 
-(defn new-cd-view [& error-msg]
+(defn new-cd-view [& [error-msg title artist]]
       (view-shell
         [:h1 "Add a New CD"]
         (if error-msg
           [:p error-msg])
         [:form {:method "post" :action "/cds"}
-               [:span "Title:"] [:input {:type "text" :name "title"}]
+               [:span "Title:"] [:input {:type "text" :name "title" :value title}]
                [:br]
-               [:span "Artist:"][:input {:type "text" :name "artist"}]
+               [:span "Artist:"][:input {:type "text" :name "artist" :value artist}]
                [:br]
                [:input {:type "submit" :value "add"}]]))
+
+(defn handle-post [title artist]
+      (if (or (empty? title) (empty? artist)) 
+        (new-cd-view "Required Info Missing" title artist)
+        (do 
+          (data/add-cd  (struct data/cd title artist))
+          (redirect "/cds"))))
 
 (defroutes main-routes
              (GET "/cds" [] (cd-list-view))
              (GET "/cds/new" [] (new-cd-view))
-             (POST "/cds" [title artist]
-                   (if (or (empty? title) (empty? artist)) 
-                     (new-cd-view "Required Info Missing")
-                     (do 
-                       (data/add-cd  (struct data/cd title artist))
-                       (redirect "/cds"))))
+             (POST "/cds" [title artist] (handle-post title artist))
              (route/resources "/")
              (route/not-found "Page not found"))
 
