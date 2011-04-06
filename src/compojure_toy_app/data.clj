@@ -18,3 +18,6 @@
 (defn add-cd [cd]
       (dosync (alter db conj cd))
       (println @db))
+
+(defn remove-cd [cd]
+      (dosync (alter db disj cd)))

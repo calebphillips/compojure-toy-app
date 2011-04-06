@@ -9,7 +9,13 @@
 
 
 (defn format-cd [{:keys [title artist]}]
-            [:tr [:td title] [:td artist]])
+            [:tr [:td title] [:td artist] 
+                 [:td [:form {:method "post" :action "/cds/delete"}
+                             [:input {:type "hidden" :name "title" :value title}]
+                             [:input {:type "hidden" :name "artist" :value artist}]
+                             [:input {:type "submit" :value "X"}]
+                             ]]])
+
 
 (defn view-shell [& content]
       (html
@@ -26,7 +32,7 @@
         [:h1 "The Play List"]  
         [:table {:border 1}
                 [:tr
-                  [:th "Title"] [:th "Artist"]]
+                  [:th "Title"] [:th "Artist"] [:th "&nbsp;"]]
                 (map format-cd (data/select-all))]
         [:p [:a {:href "/cds/new"} "New CD"]]))
 
@@ -49,10 +55,15 @@
           (data/add-cd  (struct data/cd title artist))
           (redirect "/cds"))))
 
+(defn handle-delete [title artist]
+      (data/remove-cd  (struct data/cd title artist))
+      (redirect "/cds"))
+
 (defroutes main-routes
              (GET "/cds" [] (cd-list-view))
              (GET "/cds/new" [] (new-cd-view))
              (POST "/cds" [title artist] (handle-post title artist))
+             (POST "/cds/delete" [title artist] (handle-delete title artist))
              (route/resources "/")
              (route/not-found "Page not found"))
 
